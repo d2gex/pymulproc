@@ -7,7 +7,7 @@ QUEUE_PUT_TIMEOUT_OP = 0.1
 NUM_ATTEMPTS = 10
 
 
-class QueueCommunicationApi(interfaces.CommunicationApi):
+class QueueCommunicationApi(interfaces.CommunicationInterfaceApi):
     '''Class that implements the CommunicationApi interface for JOINED QUEUE communication between two process in a
         1 to N pattern
     '''

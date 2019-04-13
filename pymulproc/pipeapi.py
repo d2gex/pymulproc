@@ -1,7 +1,7 @@
 from pymulproc import mpq_protocol, interfaces
 
 
-class PipeCommunicationApi(interfaces.CommunicationApi):
+class PipeCommunicationApi(interfaces.CommunicationInterfaceApi):
     '''Class that implements the CommunicationApi interface for PIPE communication between two process in a
     1 to 1 pattern
     '''

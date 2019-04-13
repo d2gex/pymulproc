@@ -2,7 +2,7 @@ import abc
 import multiprocessing
 
 
-class CommunicationApi(abc.ABC):
+class CommunicationInterfaceApi(abc.ABC):
     '''Define the interface that each end wil handler to communicate with each other
     '''
     def __init__(self, conn):
@@ -37,8 +37,6 @@ class CommInterfaceFactory(abc.ABC):
     def parent(self, *args):
         ''''parent' method to be implemented and used to create the end connection that a parent process will
         hold.
-        :param args:
-        :return:
         '''
         pass
 

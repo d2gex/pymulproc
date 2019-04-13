@@ -1,0 +1,11 @@
+include LICENSE
+include README.rst
+include AUTHOR
+include MANIFEST.in
+include requirements.txt
+include setup.py
+
+recursive-include tests *
+recursive-include examples *
+
+global-exclude .py[co]
