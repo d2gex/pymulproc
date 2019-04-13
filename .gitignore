@@ -1,0 +1,7 @@
+*.pyo
+*.pyc
+.DS_Store
+.cache/
+.pytest_cache/
+.python-version
+__pycache__
