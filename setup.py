@@ -18,7 +18,7 @@ setuptools.setup(
     url="https://github.com/d2gex/pymulproc",
     packages=['pymulproc'],
     python_requires='>=3.6',
-    tests_require=['pytest>=4.2.0'],
+    tests_require=['pytest>=4.4.0'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',

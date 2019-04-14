@@ -1,12 +1,12 @@
 from pymulproc import mpq_protocol, interfaces
 
 
-class PipeCommunicationApi(interfaces.CommunicationInterfaceApi):
+class PipeCommunicationApi(interfaces.CommunicationApiInterface):
     '''Class that implements the CommunicationApi interface for PIPE communication between two process in a
     1 to 1 pattern
     '''
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args)
 
     def send(self, request, recipient_pid=None, data=None):
@@ -25,21 +25,21 @@ class PipeCommunicationApi(interfaces.CommunicationInterfaceApi):
         return False
 
 
-class ParentPipeComm(PipeCommunicationApi):
+class Parent(PipeCommunicationApi):
     '''Class that will instantiate the parent process' peer - It's PIPE communication end
     '''
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.peer = mpq_protocol.PARENT_COMM_INTERFACE
 
 
-class ChildPipeComm(PipeCommunicationApi):
+class Child(PipeCommunicationApi):
     '''Class that will instantiate the child process' peer - It's PIPE communication end
     '''
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.peer = mpq_protocol.CHILD_COMM_INTERFACE
 
 

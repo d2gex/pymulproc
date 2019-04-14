@@ -7,14 +7,15 @@ QUEUE_PUT_TIMEOUT_OP = 0.1
 NUM_ATTEMPTS = 10
 
 
-class QueueCommunicationApi(interfaces.CommunicationInterfaceApi):
+class QueueCommunicationApi(interfaces.CommunicationApiInterface):
     '''Class that implements the CommunicationApi interface for JOINED QUEUE communication between two process in a
         1 to N pattern
     '''
 
-    def __init__(self, *args):
-        super().__init__(args[0])
-        self.timeout = args[1]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args)
+        self.timeout = kwargs.get('timeout', QUEUE_PUT_TIMEOUT_OP)
+        self.loops = kwargs.get('loops', NUM_ATTEMPTS)
 
     def send(self, request, recipient_pid=None, data=None):
         '''sends a message down the JOINED QUEUE
@@ -27,13 +28,12 @@ class QueueCommunicationApi(interfaces.CommunicationInterfaceApi):
             message.append(data)
 
         stop = False
-        loops = NUM_ATTEMPTS
         while not stop:
             try:
                 self.conn.put(message, timeout=self.timeout)
             except queue.Full as ex:
-                loops -= 1
-                if not loops:
+                self.loops -= 1
+                if not self.loops:
                     raise errors.QueuesCommunicationError(f"Process {self.pid} tried unsuccessfully to put the "
                                                           f"following {message} in the queue") from ex
             else:
@@ -71,20 +71,20 @@ class QueueCommunicationApi(interfaces.CommunicationInterfaceApi):
         self.conn.join()
 
 
-class ParentQueueComm(QueueCommunicationApi):
+class Parent(QueueCommunicationApi):
     '''Class that will instantiate the parent process' peer - It's QUEUE-based communication end
     '''
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.peer = mpq_protocol.PARENT_COMM_INTERFACE
 
 
-class ChildQueueComm(QueueCommunicationApi):
+class Child(QueueCommunicationApi):
     '''Class that will instantiate the child process' peer - It's QUEUE-based communication end
     '''
 
-    def __init__(self, *args):
-        super().__init__(*args)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.parent = mpq_protocol.CHILD_COMM_INTERFACE
 

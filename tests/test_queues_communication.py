@@ -21,7 +21,7 @@ def test_queue_operations():
 
     put_timeout = 0.1
     queue_factory = factory.QueueCommunication()
-    test_comm = queue_factory.parent(put_timeout)
+    test_comm = queue_factory.parent(timeout=put_timeout)
 
     # (1)
     assert test_comm.conn.empty()
@@ -61,8 +61,8 @@ def test_queue_operations():
 
     # (5)
     max_size = 1  # max number of items that can be placed in the queue
-    queue_factory = factory.QueueCommunication(max_size)
-    test_comm = queue_factory.parent(put_timeout)
+    queue_factory = factory.QueueCommunication(max_size=max_size)
+    test_comm = queue_factory.parent(timeout=put_timeout)
     test_comm.send(mpq_protocol.REQ_FINISHED)
     time.sleep(0.1)
     assert not test_comm.conn.empty()
