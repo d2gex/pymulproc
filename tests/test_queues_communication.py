@@ -1,8 +1,39 @@
 import pytest
 import time
+import queue
 
 from pymulproc import errors
 from pymulproc import mpq_protocol, factory
+from unittest.mock import patch
+
+
+def test_queue_api_params():
+    '''Check that timeout and loops are taking in consideration in the .send method of the Communication Api
+    for processes communicating via a queue as follows:
+
+    1) timeout is respected by the put method of the queue
+    2) num loops is respected by the put method of the queue. The loops are exhausted, an exception is thrown and
+    the put method is called loops times
+    '''
+
+    # (1)
+    queue_factory = factory.QueueCommunication()
+    timeout = 20
+    parent = queue_factory.parent(timeout=timeout)
+    with patch.object(parent.conn, 'put') as mock_put:
+        parent.send(mpq_protocol.REQ_TEST_PARENT)
+
+    message = [mpq_protocol.REQ_TEST_PARENT, str(parent.pid), None]
+    mock_put.assert_called_with(message, timeout=timeout)
+
+    # (2)
+    parent = queue_factory.parent(timeout=timeout, loops=20)
+    assert parent.loops == 20
+    mock_put.reset_mock()
+    with patch.object(parent.conn, 'put', side_effect=queue.Full()) as mock_put:
+        with pytest.raises(errors.QueuesCommunicationError):
+            parent.send(mpq_protocol.REQ_TEST_PARENT)
+    assert mock_put.call_count == parent.loops
 
 
 def test_queue_operations():

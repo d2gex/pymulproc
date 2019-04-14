@@ -28,12 +28,13 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
             message.append(data)
 
         stop = False
+        loops = self.loops
         while not stop:
             try:
                 self.conn.put(message, timeout=self.timeout)
             except queue.Full as ex:
-                self.loops -= 1
-                if not self.loops:
+                loops -= 1
+                if not loops:
                     raise errors.QueuesCommunicationError(f"Process {self.pid} tried unsuccessfully to put the "
                                                           f"following {message} in the queue") from ex
             else:

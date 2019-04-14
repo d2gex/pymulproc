@@ -18,7 +18,7 @@ def test_local_pipe_communication():
 
     def call_child(p_factory):
         child = p_factory.child()
-        child.send(mpq_protocol.REQ_TEST_CLIENT)
+        child.send(mpq_protocol.REQ_TEST_PARENT)
         stop = False
         loops = 10000
         # Avoiding hanging for ever
@@ -29,7 +29,7 @@ def test_local_pipe_communication():
         # was not complete and I exited with wrong
         try:
             assert len(stop) == 3
-            assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_SERVER
+            assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_CHILD
         except AssertionError:
             sys.exit(1)
 
@@ -42,8 +42,8 @@ def test_local_pipe_communication():
         loops -= 1
         stop = parent.receive()
     assert len(stop) == 3
-    assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_CLIENT
-    parent.send(mpq_protocol.REQ_TEST_SERVER)
+    assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_PARENT
+    parent.send(mpq_protocol.REQ_TEST_CHILD)
     child_process.join()
     assert child_process.exitcode == 0
 
