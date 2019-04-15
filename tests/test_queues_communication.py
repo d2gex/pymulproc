@@ -23,7 +23,7 @@ def test_queue_api_params():
     with patch.object(parent.conn, 'put') as mock_put:
         parent.send(mpq_protocol.REQ_TEST_PARENT)
 
-    message = [mpq_protocol.REQ_TEST_PARENT, str(parent.pid), None]
+    message = [mpq_protocol.REQ_TEST_PARENT, parent.pid, None]
     mock_put.assert_called_with(message, timeout=timeout)
 
     # (2)

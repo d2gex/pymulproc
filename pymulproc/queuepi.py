@@ -23,7 +23,7 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
         it will try to put a message into the QUEUE for a few attempts before raising an exception
         '''
 
-        message = [request, str(self.pid), recipient_pid]
+        message = [request, self.pid, recipient_pid]
         if data:
             message.append(data)
 
