@@ -28,7 +28,7 @@ def test_local_pipe_communication():
         # If we have not received anything or the wrong message from parent ==> Let the parent know that the job
         # was not complete and I exited with wrong
         try:
-            assert len(stop) == 3
+            assert len(stop) == 4
             assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_CHILD
         except AssertionError:
             sys.exit(1)
@@ -41,7 +41,7 @@ def test_local_pipe_communication():
     while not stop and loops:
         loops -= 1
         stop = parent.receive()
-    assert len(stop) == 3
+    assert len(stop) == 4
     assert stop[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_TEST_PARENT
     parent.send(mpq_protocol.REQ_TEST_CHILD)
     child_process.join()

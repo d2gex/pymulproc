@@ -9,12 +9,10 @@ class PipeCommunicationApi(interfaces.CommunicationApiInterface):
     def __init__(self, *args, **kwargs):
         super().__init__(*args)
 
-    def send(self, request, recipient_pid=None, data=None):
+    def send(self, request, sender_pid=None, recipient_pid=None, data=None):
         '''sends a message down the PIPE
         '''
-        message = [request, str(self.pid), recipient_pid]
-        if data:
-            message.append(data)
+        message = [request, self.pid, recipient_pid, data]
         self.conn.send(message)
 
     def receive(self):

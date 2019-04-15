@@ -17,16 +17,13 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
         self.timeout = kwargs.get('timeout', QUEUE_PUT_TIMEOUT_OP)
         self.loops = kwargs.get('loops', NUM_ATTEMPTS)
 
-    def send(self, request, recipient_pid=None, data=None):
+    def send(self, request, sender_pid=None, recipient_pid=None, data=None):
         '''sends a message down the JOINED QUEUE
 
         it will try to put a message into the QUEUE for a few attempts before raising an exception
         '''
 
-        message = [request, self.pid, recipient_pid]
-        if data:
-            message.append(data)
-
+        message = [request, self.pid if not sender_pid else sender_pid, recipient_pid, data]
         stop = False
         loops = self.loops
         while not stop:
@@ -53,12 +50,14 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
             message = False
         else:  # ... Otherwise check if this message meets the criteria of the function passed as parameter
             if not func(message):
-                args = [message[0]]
+                args = [message[mpq_protocol.S_PID_OFFSET - 1]]
+                # As the message isn't for us
                 kwargs = {
-                    'recipient_pid': message[2]
+                    'sender_pid': message[mpq_protocol.S_PID_OFFSET],
+                    'recipient_pid': message[mpq_protocol.S_PID_OFFSET + 1]
                 }
                 if len(message) == 4:
-                    kwargs['data'] = message[-1]
+                    kwargs['data'] = message[mpq_protocol.S_PID_OFFSET + 2]
                 self.send(*args, **kwargs)  # We put the message again back into the queue as it was not for us
                 message = False
             # conn.get() did actually remove a message from the queue needs to be aware of such removal

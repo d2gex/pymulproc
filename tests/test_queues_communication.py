@@ -1,6 +1,7 @@
 import pytest
 import time
 import queue
+import multiprocessing
 
 from pymulproc import errors
 from pymulproc import mpq_protocol, factory
@@ -23,7 +24,7 @@ def test_queue_api_params():
     with patch.object(parent.conn, 'put') as mock_put:
         parent.send(mpq_protocol.REQ_TEST_PARENT)
 
-    message = [mpq_protocol.REQ_TEST_PARENT, parent.pid, None]
+    message = [mpq_protocol.REQ_TEST_PARENT, parent.pid, None, None]
     mock_put.assert_called_with(message, timeout=timeout)
 
     # (2)
@@ -53,6 +54,7 @@ def test_queue_operations():
     put_timeout = 0.1
     queue_factory = factory.QueueCommunication()
     test_comm = queue_factory.parent(timeout=put_timeout)
+    pid = multiprocessing.current_process().pid
 
     # (1)
     assert test_comm.conn.empty()
@@ -86,6 +88,7 @@ def test_queue_operations():
     # --> If the message as it was has been replaced it should be the same as the one before calling 'receive'.
     message = test_comm.receive(lambda x: True)
     assert message[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_FINISHED
+    assert message[mpq_protocol.S_PID_OFFSET] == pid
     assert message[mpq_protocol.D_PID_OFFSET] == recipient_pid
     time.sleep(0.1)
     assert test_comm.conn.empty()
