@@ -89,7 +89,7 @@ def test_queue_operations():
     message = test_comm.receive(lambda x: True)
     assert message[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_FINISHED
     assert message[mpq_protocol.S_PID_OFFSET] == pid
-    assert message[mpq_protocol.D_PID_OFFSET] == recipient_pid
+    assert message[mpq_protocol.R_PID_OFFSET] == recipient_pid
     time.sleep(0.1)
     assert test_comm.conn.empty()
 

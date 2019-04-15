@@ -14,6 +14,7 @@ class PipeCommunicationApi(interfaces.CommunicationApiInterface):
         '''
         message = [request, self.pid, recipient_pid, data]
         self.conn.send(message)
+        return message
 
     def receive(self):
         '''Check if a message is ready to be caught from the PIPE

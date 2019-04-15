@@ -36,6 +36,7 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
                                                           f"following {message} in the queue") from ex
             else:
                 stop = True
+        return message
 
     def receive(self, func):
         '''Check if a message is ready to be fetched from a JOINED QUEUE
