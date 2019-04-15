@@ -66,7 +66,12 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
 
         return message
 
-    def join(self):
+    def queue_empty(self):
+        '''Wrapper method for the queue.emtpy() that check if the queue is empty
+        '''
+        return self.conn.empty()
+
+    def queue_join(self):
         '''Wrapper method for the queue.join() that wait until all tasks have been done
         '''
         self.conn.join()
