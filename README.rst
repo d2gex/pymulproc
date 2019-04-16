@@ -2,6 +2,9 @@
 ``pymulproc`` a tiny multiprocessing communication library
 ==========================================================
 
+.. image:: https://travis-ci.com/d2gex/pymulproc.svg?branch=master
+    :target: https://travis-ci.com/d2gex/pymulproc
+
 **pymulproc** is a tiny `stdlib-only` library to handle the communication between multiple processes without external
 dependencies other than Python's standard library. It is based purely in the multiprocessing library and provides a
 common interface for both PIPE and QUEUE communication.
@@ -9,19 +12,26 @@ common interface for both PIPE and QUEUE communication.
 ===================
 Pymulproc Protocol
 ===================
-**pymulproc** uses a simple data structure as the basis of the communication as follows:
+**pymulproc** uses a simple python list as the basis of the communication with the following fields:
 
 1. ``request``: a **required** string indicating the other peer what the operation is about.
-2. ``sender pid``: an **required** integer indicating the pid of the processing sending the datagram.
-3. ``recipient pid``: an **optional** integer indicating the pid of the process which this message is targeted to.
+2. ``sender pid``: a **required** integer indicating the PID of the processing sending the datagram.
+3. ``recipient pid``: an **optional** integer indicating the PID of the process which this message is targeted to.
 4. ``data``: an **optional** python data structure containing the information intended for the other peer.
 
-In turn the requests sent in the data structure could be anything however **pymulproc** uses the following standards:
+In turns the requests sent in the data structure could be anything however **pymulproc** uses the following standards:
 
-6. ``REQ_DO``: requests that indicates the other peer to do a task
-7. ``REQ_FINISHED``: requests that indicates the other peer that the task has been done
+6. ``REQ_DO``: requests that indicates the other peer to do a task.
+7. ``REQ_FINISHED``: requests that indicates the other peer that the task has been done.
 8. ``REQ_DIE``: requests that indicates the other peer to stop and die as soon as possible. Practically a poison pill.
 
+Example of valid message structures are shown below. **The message must always have a length of 4**:
+
+.. code-block:: python
+
+    ['DO', 1234, 12345, {'value': 20}]  # request, sender PID, recipient PID, data
+    ['DO', 1234, 12345, None]  # request, sender PID, recipient PID
+    ['DIE', 1234, None, None]  # request, sender PID
 
 ===================
 Pymulproc API
@@ -30,7 +40,7 @@ Pymulproc API
 for both PIPE and QUEUE communication as follows:
 
 9.  ``send``: sends a message down the PIPE for 1:1 conversation or put a message in a JoinedQueue for 1:M, M:1 and M:M
-    conversations
+    conversations.
 10. ``receive``: check if there is a message in the PIPE or at the front of the QUEUE for the process making such
     an enquiry. if the message is not intended for the process making the enquiry False is returned. In case the
     communication is done via QUEUEs, the method puts back the message in the queue so that the targeted process can
@@ -40,27 +50,39 @@ Queue's communication add two more specific method: ``queue_empty`` to check if 
 ``queue_join`` to wait there until all the queue is empty.
 
 Among the optional parameters of the  ``send`` method signature shown below, is worthwhile highlighting ``sender_pid``.
-If provided, such integer is added to the message data structure as sender PID otherwise the process will add its own
+If provided, such integer is added to the message as sender PID. Otherwise the process will add its own
 PID.
 
-The ``receive`` method takes as parameter another function that in turn takes the message extracted from the queue
+``send`` will try to place the message in the queue, for queue communication only, a few times before raising an
+exception. The amount of tries can be configured when instantiating the connection handler - see ``QueueCommunicationApi``
+class' constructor for further details.
 
 .. code-block:: python
 
-@abc.abstractmethod
-    def send(self, request, sender_pid=None, recipient_pid=None, data=None):
+    @abc.abstractmethod
+        def send(self, request, sender_pid=None, recipient_pid=None, data=None):
+
+``receive`` is a High Order function and may take a ``func`` keyword argument associated to a function that applies
+an operation to the message at the front of the queue. If the result is True, then the message is for the enquiring
+process. Otherwise it is 'reinserted' at the back of the queue for other processes to check on it.
+
+If not parameters are passed, it is understood that the message at front of the queue is always for enquiring process.
+An example where the criteria to check if the message is for the enquiring process always fails, is shown below:
+
+.. code-block:: python
+
+    child.receive(lambda x: False)
 
 
-
-===================
-Pymulproc examples
-===================
+======================================
+Pymulproc PIPE communication example
+======================================
+Below a simple example of PIPE communication betwen a parent and a single child process is shown:
 
 .. code-block:: python
 
     import multiprocessing
     from pymulproc import factory, mpq_protocol
-
 
     def test_simple_pipe_communication():
 
@@ -81,7 +103,16 @@ Pymulproc examples
         assert message[request_offset] == mpq_protocol.REQ_TEST_CHILD
 
 
+=================================================
+Pymulproc simple 1:N QUEUE communication example
+=================================================
+The example below shows how child processes send some data back to the parent. Notice how the parent passes no ``func``
+parameter to ``receive`` as all messages placed in the queue by the child processes are intended for the parent itself:
+
 .. code-block:: python
+
+    import multiprocessing
+    from pymulproc import factory, mpq_protocol
 
     def test_children_to_parent_communication():
         '''Simple test where all child processes send a message to the parent process
@@ -114,7 +145,7 @@ Pymulproc examples
         counter = 0
         data_offset = mpq_protocol.S_PID_OFFSET + 2
         while not parent.queue_empty():
-            message = parent.receive(lambda x: True)
+            message = parent.receive()
             counter += message[data_offset]
 
         # Ensure the queue is empty - no loose strings
@@ -122,3 +153,14 @@ Pymulproc examples
 
         # Ensure we got the right data from children
         assert counter == val * len(child_processes)
+
+
+=============
+More examples
+=============
+
+For a more complex example look at the test test_parent_full_duplex_communication_with_children_stress_test_ where
+a full duplex communication between the parent and child processes occurs. Also a poison pill is sent to all children
+when they are no longer needed.
+
+.. _test_parent_full_duplex_communication_with_children_stress_test: https://github.com/d2gex/pymulproc/blob/master/tests/test_queue_communication.py
