@@ -38,11 +38,15 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
                 stop = True
         return message
 
-    def receive(self, func):
-        '''Check if a message is ready to be fetched from a JOINED QUEUE
+    def receive(self, **kwargs):
+        '''High Order function that checks if a message is ready to be fetched from a JOINED QUEUE and if it is whether
+        is for the process doing the enquiry or not.
 
-        This High order function that takes another function as parameter in order to check if the latest message in the
-        queue meets a certain criteria. The criteria usually is to check if the message received is for us.
+        1) If not 'func' keyword parameter is passed to this function => the process will always fetch the message
+        in front of the queue, if there exist one.
+        2) If by contrary a 'func' parameter is associated to a function, such function is applied to the message
+        at the front of the queue and if the result is True the the process will fetch the message from the queue.
+        Otherwise it will reinsert the message at the back of the queue.
         '''
 
         try:
@@ -50,6 +54,7 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
         except queue.Empty:  # Is the queue empty?...
             message = False
         else:  # ... Otherwise check if this message meets the criteria of the function passed as parameter
+            func = kwargs.get('func', lambda x: True)
             if not func(message):
                 args = [message[mpq_protocol.S_PID_OFFSET - 1]]
                 # As the message isn't for us

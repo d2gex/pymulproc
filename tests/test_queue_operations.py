@@ -58,7 +58,7 @@ def test_queue_operations():
 
     # (1)
     assert test_comm.conn.empty()
-    message = test_comm.receive(None)
+    message = test_comm.receive()
     assert message is False
 
     # (2)
@@ -67,7 +67,7 @@ def test_queue_operations():
     assert not test_comm.conn.empty()
 
     # (3)
-    message = test_comm.receive(lambda x: True)
+    message = test_comm.receive()
     assert message[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_FINISHED
     time.sleep(0.1)
     assert test_comm.conn.empty()
@@ -80,13 +80,13 @@ def test_queue_operations():
     assert not test_comm.conn.empty()
 
     # --> Now we try to receive a message from the queue that isn't ours. The queue doesn't change
-    message = test_comm.receive(lambda x: False)
+    message = test_comm.receive(func=lambda x: False)
     assert message is False
     time.sleep(0.1)
     assert not test_comm.conn.empty()
 
     # --> If the message as it was has been replaced it should be the same as the one before calling 'receive'.
-    message = test_comm.receive(lambda x: True)
+    message = test_comm.receive()
     assert message[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_FINISHED
     assert message[mpq_protocol.S_PID_OFFSET] == pid
     assert message[mpq_protocol.R_PID_OFFSET] == recipient_pid
@@ -106,7 +106,7 @@ def test_queue_operations():
     # (6)
     # As we have been using .receive with lambda True and False, if the counting down of the elements being taken off
     # the queue was wrong this test would never end and block indefinitely
-    test_comm.receive(lambda x: True)
+    test_comm.receive()
     time.sleep(0.1)
     assert test_comm.conn.empty()
     test_comm.conn.join()

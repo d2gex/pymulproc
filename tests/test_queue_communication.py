@@ -34,7 +34,7 @@ class ChildProcess:
             stop = False
             while not stop:
                 time.sleep(0.1)
-                message = self.conn.receive(self.is_message_for_me)
+                message = self.conn.receive(func=self.is_message_for_me)
                 if message:
                     if message[mpq_protocol.S_PID_OFFSET - 1] == mpq_protocol.REQ_DIE:
                         stop = True
@@ -77,7 +77,7 @@ def parent_full_duplex_communication_with_children(min_processes, max_processes)
     stop = False
     message = False
     while not stop:
-        message = parent.receive(lambda sms: sms[mpq_protocol.R_PID_OFFSET] == parent_pid)
+        message = parent.receive(func=lambda sms: sms[mpq_protocol.R_PID_OFFSET] == parent_pid)
         if message:
             stop = True
 
@@ -128,7 +128,7 @@ def test_children_to_parent_communication():
     counter = 0
     data_offset = mpq_protocol.S_PID_OFFSET + 2
     while not parent.queue_empty():
-        message = parent.receive(lambda x: True)
+        message = parent.receive()
         counter += message[data_offset]
 
     # Ensure the queue is empty - no loose strings
