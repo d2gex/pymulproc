@@ -46,4 +46,3 @@ def test_local_pipe_communication():
     parent.send(mpq_protocol.REQ_TEST_CHILD)
     child_process.join()
     assert child_process.exitcode == 0
-

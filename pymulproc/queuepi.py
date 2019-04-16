@@ -98,4 +98,3 @@ class Child(QueueCommunicationApi):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent = mpq_protocol.CHILD_COMM_INTERFACE
-

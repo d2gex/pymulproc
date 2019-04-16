@@ -5,12 +5,14 @@
 .. image:: https://travis-ci.com/d2gex/pymulproc.svg?branch=master
     :target: https://travis-ci.com/d2gex/pymulproc
 
-**pymulproc** is a tiny `stdlib-only` library to handle the communication between multiple processes without external
+.. image:: https://img.shields.io/badge/pypi_package-0.1.1-brightgreen.svg
+    :target: #
+
+**pymulproc** is a tiny library to handle the communication between multiple processes without external
 dependencies other than Python's standard library. It is based purely in the multiprocessing library and provides a
 common interface for both PIPE and QUEUE communication.
 
-===================
-Pymulproc Protocol
+pymulproc Protocol
 ===================
 **pymulproc** uses a simple python list as the basis of the communication with the following fields:
 
@@ -33,8 +35,7 @@ Example of valid message structures are shown below. **The message must always h
     ['DO', 1234, 12345, None]  # request, sender PID, recipient PID
     ['DIE', 1234, None, None]  # request, sender PID
 
-===================
-Pymulproc API
+pymulproc API
 ===================
 **pymulproc** offers a common API interface for the conversation exchange between a parent process and its children
 for both PIPE and QUEUE communication as follows:
@@ -74,8 +75,15 @@ An example where the criteria to check if the message is for the enquiring proce
     child.receive(lambda x: False)
 
 
-======================================
-Pymulproc PIPE communication example
+Installing pymulproc
+====================
+
+**pymulproc** is available on PyPI_, so you can install it with ``pip``::
+
+    $ pip install pymulproc
+
+
+pymulproc PIPE communication example
 ======================================
 Below a simple example of PIPE communication betwen a parent and a single child process is shown:
 
@@ -102,9 +110,7 @@ Below a simple example of PIPE communication betwen a parent and a single child 
         request_offset = mpq_protocol.S_PID_OFFSET - 1
         assert message[request_offset] == mpq_protocol.REQ_TEST_CHILD
 
-
-=================================================
-Pymulproc simple 1:N QUEUE communication example
+pymulproc simple 1:N QUEUE communication example
 =================================================
 The example below shows how child processes send some data back to the parent. Notice how the parent passes no ``func``
 parameter to ``receive`` as all messages placed in the queue by the child processes are intended for the parent itself:
@@ -113,6 +119,33 @@ parameter to ``receive`` as all messages placed in the queue by the child proces
 
     import multiprocessing
     from pymulproc import factory, mpq_protocol
+
+
+    class ChildProcess:
+        def __init__(self, identifier, parent_pid, conn):
+            self.id = identifier
+            self.conn = conn
+            self.parent_pid = parent_pid
+            self.pid = multiprocessing.current_process().pid
+
+        def is_message_for_me(self, message):
+            '''The message is for me if either the recipient_pid coincides with my pid or is None - None indicates
+            that the message is for everyone
+            '''
+            return message[mpq_protocol.S_PID_OFFSET + 1] == self.pid or not message[mpq_protocol.S_PID_OFFSET + 1]
+
+        def run(self, **kwargs):
+            '''Sends the data passed as keyword parameter to the parent process:
+            '''
+
+            data = kwargs.get('data', None)
+            self.conn.send(mpq_protocol.REQ_FINISHED, data=data)
+
+
+    def call_child(identifier, parent_pid, q_factory, data):
+        child = ChildProcess(identifier, parent_pid, q_factory.child())
+        child.run(data=data)
+
 
     def test_children_to_parent_communication():
         '''Simple test where all child processes send a message to the parent process
@@ -155,7 +188,6 @@ parameter to ``receive`` as all messages placed in the queue by the child proces
         assert counter == val * len(child_processes)
 
 
-=============
 More examples
 =============
 
@@ -164,3 +196,4 @@ a full duplex communication between the parent and child processes occurs. Also 
 when they are no longer needed.
 
 .. _test_parent_full_duplex_communication_with_children_stress_test: https://github.com/d2gex/pymulproc/blob/master/tests/test_queue_communication.py
+.. _PyPI: http://pypi.python.org/pypi/bleach

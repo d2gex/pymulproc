@@ -110,13 +110,3 @@ def test_queue_operations():
     time.sleep(0.1)
     assert test_comm.conn.empty()
     test_comm.conn.join()
-
-
-
-
-
-
-
-
-
-

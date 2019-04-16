@@ -146,12 +146,3 @@ def test_parent_full_duplex_communication_with_children_stress_test():
         min_p = random.randint(1, 5)
         max_p = random.randint(min_p, 10)
         parent_full_duplex_communication_with_children(min_p, max_p)
-
-
-
-
-
-
-
-
-

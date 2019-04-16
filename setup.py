@@ -21,7 +21,7 @@ setuptools.setup(
     tests_require=['pytest>=4.4.0'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
-        'Environment :: Web Environment',
+        'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent',
@@ -29,7 +29,6 @@ setuptools.setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
-        'Topic :: Communication :: Multiprocessing',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ]
 )

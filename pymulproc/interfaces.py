@@ -27,4 +27,3 @@ class CommunicationApiInterface(abc.ABC):
         Queue, respectively.
         '''
         pass
-

@@ -40,6 +40,3 @@ class Child(PipeCommunicationApi):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.peer = mpq_protocol.CHILD_COMM_INTERFACE
-
-
-
