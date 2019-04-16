@@ -20,7 +20,7 @@ R_PID_OFFSET = S_PID_OFFSET + 1  # offset where the PID of the recipient process
 # +    Sender Pid          + # (Integer)
 # +------------------------+
 # +------------------------+
-# +    Recipient Pid     + # (String)
+# +    Recipient Pid     + # # (Integer)
 # +------------------------+
 # +------------------------+
 # +    Data                + # (Any Python data structured)
