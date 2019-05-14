@@ -8,6 +8,9 @@
 .. image:: https://img.shields.io/badge/pypi_package-0.1.1-brightgreen.svg
     :target: #
 
+.. image:: https://img.shields.io/badge/coverage-98%25-brightgreen.svg
+    :target: #
+
 **pymulproc** is a tiny library to handle the communication between multiple processes without external
 dependencies other than Python's standard library. It is based purely in the multiprocessing library and provides a
 common interface for both PIPE and QUEUE communication.
