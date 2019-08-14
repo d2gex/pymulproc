@@ -5,7 +5,7 @@
 .. image:: https://travis-ci.com/d2gex/pymulproc.svg?branch=master
     :target: https://travis-ci.com/d2gex/pymulproc
 
-.. image:: https://img.shields.io/badge/pypi_package-0.1.1-brightgreen.svg
+.. image:: https://img.shields.io/badge/pypi_package-0.1.2-brightgreen.svg
     :target: #
 
 .. image:: https://img.shields.io/badge/coverage-98%25-brightgreen.svg
@@ -71,6 +71,11 @@ an operation to the message at the front of the queue. If the result is True, th
 process. Otherwise it is 'reinserted' at the back of the queue for other processes to check on it.
 
 If not parameters are passed, it is understood that the message at front of the queue is always for enquiring process.
+
+Additionally if ``block=True`` is passed to ``receive``, the process enquiring the queue will block while the queue
+remains empty. It will then "*wake up*" and check the queue again when another process sends information in via
+``send``.
+
 An example where the criteria to check if the message is for the enquiring process always fails, is shown below:
 
 .. code-block:: python

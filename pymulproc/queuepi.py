@@ -46,11 +46,11 @@ class QueueCommunicationApi(interfaces.CommunicationApiInterface):
         in front of the queue, if there exist one.
         2) If by contrary a 'func' parameter is associated to a function, such function is applied to the message
         at the front of the queue and if the result is True the the process will fetch the message from the queue.
-        Otherwise it will reinsert the message at the back of the queue.
+        Otherwise it will reinsert the message at the back of it.
         '''
 
         try:
-            message = self.conn.get(block=False)
+            message = self.conn.get(block=kwargs.get('block', False))
         except queue.Empty:  # Is the queue empty?...
             message = False
         else:  # ... Otherwise check if this message meets the criteria of the function passed as parameter
